@@ -1,0 +1,170 @@
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.print.PrinterException;
+import javax.swing.*;
+
+public class ElectricityBillGenerator extends JFrame implements ActionListener {
+
+    // GUI Components
+    private JTextField tfName, tfId, tfUnits;
+    private JTextArea taBill;
+    private JButton btnGenerate, btnClear, btnPrint;
+
+    public ElectricityBillGenerator() {
+
+        // === Frame Settings ===
+        setTitle("Electricity Bill Generator - Team: Krish Jangid, Krish, Krishna");
+        setSize(450, 500);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(null);
+
+        // === Title ===
+        JLabel lblTitle = new JLabel("ELECTRICITY BILL GENERATOR", JLabel.CENTER);
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        lblTitle.setBounds(40, 15, 350, 30);
+        add(lblTitle);
+
+        // === Labels and Fields ===
+        JLabel lblId = new JLabel("Customer ID:");
+        lblId.setBounds(50, 70, 120, 25);
+        add(lblId);
+
+        tfId = new JTextField();
+        tfId.setBounds(200, 70, 180, 25);
+        add(tfId);
+
+        JLabel lblName = new JLabel("Customer Name:");
+        lblName.setBounds(50, 110, 120, 25);
+        add(lblName);
+
+        tfName = new JTextField();
+        tfName.setBounds(200, 110, 180, 25);
+        add(tfName);
+
+        JLabel lblUnits = new JLabel("Units Consumed:");
+        lblUnits.setBounds(50, 150, 120, 25);
+        add(lblUnits);
+
+        tfUnits = new JTextField();
+        tfUnits.setBounds(200, 150, 180, 25);
+        add(tfUnits);
+
+        // === Buttons ===
+        btnGenerate = new JButton("Generate Bill");
+        btnGenerate.setBounds(50, 200, 130, 35);
+        btnGenerate.addActionListener(this);
+        add(btnGenerate);
+
+        btnClear = new JButton("Clear");
+        btnClear.setBounds(190, 200, 80, 35);
+        btnClear.addActionListener(this);
+        add(btnClear);
+
+        btnPrint = new JButton("Print / Save as PDF");
+        btnPrint.setBounds(280, 200, 150, 35);
+        btnPrint.addActionListener(this);
+        add(btnPrint);
+
+        // === Text Area for Bill Output ===
+        taBill = new JTextArea();
+        taBill.setEditable(false);
+        taBill.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        JScrollPane sp = new JScrollPane(taBill);
+        sp.setBounds(40, 260, 370, 170);
+        add(sp);
+
+        // === Footer ===
+        JLabel lblFooter = new JLabel("Developed by: Krish Jangid, Krish & Krishna", JLabel.CENTER);
+        lblFooter.setFont(new Font("Arial", Font.ITALIC, 11));
+        lblFooter.setBounds(40, 440, 370, 20);
+        add(lblFooter);
+
+        setVisible(true);
+    }
+
+    // === Action Handling ===
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == btnGenerate) {
+            generateBill();
+        } 
+        else if (e.getSource() == btnClear) {
+            tfId.setText("");
+            tfName.setText("");
+            tfUnits.setText("");
+            taBill.setText("");
+        } 
+        else if (e.getSource() == btnPrint) {
+            printBill();
+        }
+    }
+
+    // === Bill Generation Logic ===
+    private void generateBill() {
+        try {
+            int id = Integer.parseInt(tfId.getText());
+            String name = tfName.getText();
+            double units = Double.parseDouble(tfUnits.getText());
+
+            if (units < 0) {
+                JOptionPane.showMessageDialog(this, "Units cannot be negative!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            double bill = calculateBill(units);
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("-------------- ELECTRICITY BILL --------------\n");
+            sb.append("Customer ID      : " + id + "\n");
+            sb.append("Customer Name    : " + name + "\n");
+            sb.append("Units Consumed   : " + units + "\n");
+            sb.append("----------------------------------------------\n");
+            sb.append(String.format("Total Bill (₹)   : %.2f\n", bill));
+            sb.append("----------------------------------------------\n");
+            sb.append("Fixed Charges    : ₹50 Included\n");
+            sb.append("Team Members     : Krish Jangid, Krish, Krishna\n");
+            sb.append("----------------------------------------------\n");
+            sb.append("Thank you for using our service!\n");
+
+            taBill.setText(sb.toString());
+
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numeric details!", "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // === Calculation Logic ===
+    private double calculateBill(double units) {
+        double amount;
+        if (units <= 100)
+            amount = units * 3;
+        else if (units <= 200)
+            amount = 100 * 3 + (units - 100) * 4.5;
+        else if (units <= 400)
+            amount = 100 * 3 + 100 * 4.5 + (units - 200) * 6;
+        else
+            amount = 100 * 3 + 100 * 4.5 + 200 * 6 + (units - 400) * 7.5;
+
+        return amount + 50; // Fixed charge
+    }
+
+    // === Print or Save Bill as PDF ===
+    private void printBill() {
+        try {
+            boolean done = taBill.print(); // opens system print dialog
+            if (done) {
+                JOptionPane.showMessageDialog(this, "Bill sent to printer or saved as PDF successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Printing cancelled.");
+            }
+        } catch (PrinterException ex) {
+            JOptionPane.showMessageDialog(this, "Error while printing: " + ex.getMessage());
+        }
+    }
+
+    // === Main Method ===
+    public static void main(String[] args) {
+        new ElectricityBillGenerator();
+    }
+}
